@@ -1,0 +1,13 @@
+name: Hello World Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  say_hello:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Run a one-line script
+        run: echo "Hello World!"
