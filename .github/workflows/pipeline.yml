@@ -16,14 +16,32 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: '24'
+
       - name: Install dependencies
         run: npm install
+
       - name: Check style (Lint)
         run: npm run eslint
+
       - name: Build production bundle
         run: npm run build
+
       - name: Run tests
         run: npm run test
+
       - name: Trigger deployment
         if: ${{ github.event_name == 'push' }}
         run: curl ${{ secrets.RENDER_DEPLOY_HOOK }}
+
+  tag_release:
+    needs: [simple_deployment_pipeline]
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@1.75.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: patch
