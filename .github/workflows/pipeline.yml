@@ -20,3 +20,7 @@ jobs:
         run: npm install
       - name: Check style (Lint)
         run: npm run eslint
+      - name: Build production bundle
+        run: npm run build
+      - name: Run tests
+        run: npm run test
