@@ -9,7 +9,7 @@ on:
     types: [opened, synchronize]
 
 jobs:
-  simple_deployment_pipeline:
+  lint_and_test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -23,41 +23,54 @@ jobs:
       - name: Check style (Lint)
         run: npm run eslint
 
+      - name: Run unit tests
+        run: npm run test
+
+  deploy:
+    needs: [lint_and_test]
+    if: ${{ github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install
+
       - name: Build production bundle
         run: npm run build
 
-      - name: Run tests
-        run: npm run test
-
       - name: Trigger deployment
-        if: ${{ github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip') }}
         run: curl ${{ secrets.RENDER_DEPLOY_HOOK }}
 
-      - name: Discord Notification on Success
-        if: ${{ success() && github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip') }}
-        uses: sarisia/actions-status-discord@v1
-        with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          status: success
-          content: 'A new version of Pokedex has been successfully deployed to Render!'
-
-      - name: Discord Notification on Failure
-        if: ${{ failure() }}
-        uses: sarisia/actions-status-discord@v1
-        with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          status: failure
-          content: 'Build failed! Commit block: `${{ github.sha }}` by ${{ github.actor }}. Message: ${{ github.event.head_commit.message }}'
-
-  tag_release:
-    needs: [simple_deployment_pipeline]
-    if: ${{ github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip') }}
+  tag_and_notify:
+    needs: [deploy]
+    if: ${{ always() && !contains(github.event.head_commit.message, '#skip') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
       - name: Bump version and push tag
+        if: ${{ needs.deploy.result == 'success' }}
         uses: anothrNick/github-tag-action@1.75.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: patch
+
+      - name: Discord Notification on Success
+        if: ${{ needs.deploy.result == 'success' }}
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: success
+          content: 'A new version of Pokedex has been successfully split into jobs and deployed to Render!'
+
+      - name: Discord Notification on Failure
+        if: ${{ needs.deploy.result == 'failure' }}
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: failure
+          content: 'Deployment failed! Commit: `${{ github.sha }}`. Check job architecture.'
