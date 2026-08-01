@@ -9,5 +9,14 @@ jobs:
   say_hello:
     runs-on: ubuntu-24.04
     steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
       - name: Run a one-line script
         run: echo "Hello World!"
+
+      - name: Print current date
+        run: date
+
+      - name: List directory contents in long format
+        run: ls -la
