@@ -33,6 +33,22 @@ jobs:
         if: ${{ github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip') }}
         run: curl ${{ secrets.RENDER_DEPLOY_HOOK }}
 
+      - name: Discord Notification on Success
+        if: ${{ success() && github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip') }}
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: success
+          content: 'A new version of Pokedex has been successfully deployed to Render!'
+
+      - name: Discord Notification on Failure
+        if: ${{ failure() }}
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: failure
+          content: 'Build failed! Commit block: `${{ github.sha }}` by ${{ github.actor }}. Message: ${{ github.event.head_commit.message }}'
+
   tag_release:
     needs: [simple_deployment_pipeline]
     if: ${{ github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip') }}
