@@ -6,7 +6,7 @@ module.exports = defineConfig({
   workers: 1,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:5000',
+    baseURL: 'http://127.0.0.1:5000',
     trace: 'on-first-retry',
   },
   projects: [
@@ -16,9 +16,10 @@ module.exports = defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run start',
-    url: 'http://localhost:5000',
+    // ИСПРАВЛЕНО: Явно передаем PORT=5000 для Node.js сервера (кроссплатформенный вариант)
+    command: process.platform === 'win32' ? 'set PORT=5000&&npm run start-prod' : 'PORT=5000 npm run start-prod',
+    url: 'http://127.0.0.1:5000',
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
+    timeout: 60 * 1000, // Сократим ожидание до 1 минуты для быстрой отладки
   },
 })
