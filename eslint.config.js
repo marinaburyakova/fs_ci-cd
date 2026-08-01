@@ -73,5 +73,23 @@ module.exports = [
       'no-console': 'error',
       'react/prop-types': 0
     }
+  },
+
+  {
+    files: ['jest.setup.js'],
+    languageOptions: {
+      ecmaVersion: 2018,
+      sourceType: 'commonjs',
+      globals: {
+        ...globals.node,
+        ...globals.jest
+      }
+    },
+    rules: {
+      'indent': ['error', 2],
+      'quotes': ['error', 'single'],
+      'semi': ['error', 'never']
+    }
   }
+
 ]

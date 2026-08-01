@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react'
 import axiosMock from 'axios'
 import '@testing-library/jest-dom'
 import PokemonPage from '../src/PokemonPage'
-
 import { MemoryRouter } from 'react-router-dom'
 
 jest.mock('axios')
@@ -59,13 +58,13 @@ const pokemonList = {
   sprites: { front_default: 'URL' }
 }
 
-const previous = {
+const mockPrevious = {
   url: 'https://pokeapi.co/api/v2/pokemon/132/',
   name: 'ditto',
   id: 132
 }
 
-const next = {
+const mockNext = {
   url: 'https://pokeapi.co/api/v2/pokemon/134/',
   name: 'vaporeon',
   id: 134
@@ -107,7 +106,7 @@ describe('<PokemonPage />', () => {
     await act(async () => {
       render(
         <MemoryRouter initialEntries={['/pokemon/eevee']}>
-          <PokemonPage previous={previous} next={next}/>
+          <PokemonPage previous={mockPrevious} next={mockNext}/>
         </MemoryRouter>,
       )
     })
