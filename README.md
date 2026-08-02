@@ -6,6 +6,7 @@ The project is a monorepo consisting of a Node.js backend and a React frontend b
 
 ##  Live Application Link
 You can access and test the live deployed production application here:
-https://fs-ci-cd-my.onrender.com
+https://fs-ci-cd-my.onrender.com 
+*(Note: Currently paused on Render due to free tier hosting limits, deployment history available in GitHub Actions)*
 
 
